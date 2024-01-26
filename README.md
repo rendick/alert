@@ -9,6 +9,9 @@
 
 Thanks to Golang's syntax, anyone who already knows any C-like language and who wants to help the project can contribute to this repository.
 
+![image](https://github.com/rendick/alert/assets/91757099/3978f5d9-96bf-4b67-a0b6-d04260e3aeca)
+
+
 # Installation
 
 Use the `install.sh` to install the project.
