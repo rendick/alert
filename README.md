@@ -5,7 +5,7 @@
 ![version](https://img.shields.io/badge/version-0.1.1-blue)
 ![repository stars](https://img.shields.io/github/stars/rendick/alert?style=flat)
 
-![alert](https://github.com/rendick/alert) is a CLI application to receive notifications about air raid alerts in Ukraine.
+[alert](https://github.com/rendick/alert) is a CLI application to receive notifications about air raid alerts in Ukraine.
 
 Thanks to Golang's syntax, anyone who already knows any C-like language and who wants to help the project can contribute to this repository.
 
@@ -30,4 +30,4 @@ alert --help
 
 # License 
 
-![MIT License](https://opensource.org/license/mit/)
+[MIT License](https://opensource.org/license/mit/)
