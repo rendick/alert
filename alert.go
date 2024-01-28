@@ -39,6 +39,7 @@ type Alert struct {
 	LastUpdate    string `json:"lastUpdate"`
 	RegionEngName string `json:"regionEngName"`
 	RegionId      string `json:"regionId"`
+	RegionType    string `json:"regionType"`
 }
 
 var alerts []Alert
@@ -87,11 +88,17 @@ func handleAlerts() {
 }
 
 func printAlerts(alerts []Alert) {
+
 	for num, alert := range alerts {
+		if alert.RegionType == "State" {
+			alert.RegionType = "Область"
+		} else if alert.RegionType == "Community" {
+			alert.RegionType = "Громада"
+		}
 		fmt.Printf("%d."+Red+Bold+" Повітряна тривога:"+Reset+" %s [%s] %s \n",
 			num+1,
 			alert.RegionName,
-			alert.RegionId,
+			alert.RegionType,
 			strings.ReplaceAll(strings.ReplaceAll(alert.LastUpdate, "T", " "), "Z", ""))
 	}
 	fmt.Printf(Bold+"\nСтаном на: %s\n"+Reset, time.Now().Format("2006-01-02 15:04:05"))
