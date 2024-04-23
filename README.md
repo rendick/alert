@@ -14,13 +14,10 @@ Thanks to Golang's syntax, anyone who already knows any C-like language and who 
 
 # Installation
 
-Use the `install.sh` to install the project.
-
 ```sh
 git clone https://github.com/rendick/alert.git
 cd alert
-sh install.sh
-alert
+sudo make install
 ```
 
 # Usage
@@ -28,7 +25,7 @@ alert
 If you want to know how to use the commmand, you need to try `--help` for more information.
 
 ```sh
-alert --help
+alert && alert --help
 ```
 
 # License 
