@@ -1,0 +1,15 @@
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.prof
+*.out
+.cache/
+.tmp/
+*.log
+/vendor/
+/go.sum
+/output/
+/build/
+alert
