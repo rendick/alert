@@ -12,4 +12,5 @@
 /go.sum
 /output/
 /build/
-alert
+/bin/
+./alert
