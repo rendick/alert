@@ -4,19 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
+	"os/user"
 	"strings"
 	"time"
 )
 
 var (
-	// API
-	api = "https://siren.pp.ua/api/v3/alerts"
-
-	// Color
 	Red   = "\033[31m"
 	Bold  = "\033[1m"
 	Reset = "\033[0m"
+
+	api = "https://siren.pp.ua/api/v3/alerts"
 )
 
 type Alert struct {
@@ -27,12 +29,10 @@ type Alert struct {
 	RegionType    string `json:"regionType"`
 }
 
-var alerts []Alert
-
 func handleAlerts() {
 	res, err := http.Get(api)
 	if err != nil {
-		fmt.Printf("[0/1] error getting an API: %s\n", err)
+		fmt.Printf("[0/1] error getting API: %s\n", err)
 		return
 	}
 	defer res.Body.Close()
@@ -43,16 +43,23 @@ func handleAlerts() {
 		return
 	}
 
+	var alerts []Alert
 	err = json.Unmarshal(body, &alerts)
 	if err != nil {
 		fmt.Printf("[0/1] error unmarshaling JSON file: %s\n", err)
 		return
 	}
+
+	if shouldShowCount() {
+		countAlerts(alerts)
+		return
+	}
+
 	printAlerts(alerts)
 }
 
 func printAlerts(alerts []Alert) {
-	replacement := map[string]string{
+	replacements := map[string]string{
 		"State":     "Область",
 		"Community": "Громада",
 	}
@@ -60,16 +67,46 @@ func printAlerts(alerts []Alert) {
 	for num, alert := range alerts {
 		modifiedName := alert.RegionType
 
-		for oldStr, newStr := range replacement {
+		for oldStr, newStr := range replacements {
 			modifiedName = strings.ReplaceAll(modifiedName, oldStr, newStr)
 		}
 
-		fmt.Printf("%d."+Red+Bold+" Повітряна тривога:"+Reset+" %s [%s] %s \n",
+		fmt.Printf("%d. "+Red+Bold+"Повітряна тривога:"+Reset+" %s [%s] %s \n",
 			num+1,
 			alert.RegionName,
 			modifiedName,
 			strings.ReplaceAll(strings.ReplaceAll(alert.LastUpdate, "T", " "), "Z", ""))
 	}
+
 	fmt.Printf(Bold+"\nСтаном на: %s\n"+Reset, time.Now().Format("2006-01-02 15:04:05"))
-	return
+}
+
+func countAlerts(alerts []Alert) {
+	count := len(alerts)
+	fmt.Printf("%d\n", count)
+}
+
+func currentRegion() {
+	userName, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	configDir, err := ioutil.ReadFile(userName.HomeDir + "/.config/alert.conf")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(strings.TrimSpace(string(configDir)))
+}
+
+func shouldShowCount() bool {
+	for _, arg := range os.Args {
+		if arg == "-n" {
+			return true
+		} else if arg == "-c" {
+			return true
+		}
+	}
+
+	return false
 }
