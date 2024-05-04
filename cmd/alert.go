@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,12 +12,11 @@ import (
 	"time"
 )
 
-var (
-	Red   = "\033[31m"
-	Bold  = "\033[1m"
-	Reset = "\033[0m"
-
-	api = "https://siren.pp.ua/api/v3/alerts"
+const (
+	red   = "\033[31m"
+	bold  = "\033[1m"
+	reset = "\033[0m"
+	api   = "https://siren.pp.ua/api/v3/alerts"
 )
 
 type Alert struct {
@@ -32,30 +30,29 @@ type Alert struct {
 func handleAlerts() {
 	res, err := http.Get(api)
 	if err != nil {
-		fmt.Printf("[0/1] error getting API: %s\n", err)
+		fmt.Printf("Error getting API: %s\n", err)
 		return
 	}
 	defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("[0/1] error reading JSON file: %s\n", err)
+		fmt.Printf("Error reading JSON file: %s\n", err)
 		return
 	}
 
 	var alerts []Alert
 	err = json.Unmarshal(body, &alerts)
 	if err != nil {
-		fmt.Printf("[0/1] error unmarshaling JSON file: %s\n", err)
+		fmt.Printf("Error unmarshaling JSON file: %s\n", err)
 		return
 	}
 
 	if shouldShowCount() {
 		countAlerts(alerts)
-		return
+	} else {
+		printAlerts(alerts)
 	}
-
-	printAlerts(alerts)
 }
 
 func printAlerts(alerts []Alert) {
@@ -66,24 +63,32 @@ func printAlerts(alerts []Alert) {
 
 	for num, alert := range alerts {
 		modifiedName := alert.RegionType
-
 		for oldStr, newStr := range replacements {
 			modifiedName = strings.ReplaceAll(modifiedName, oldStr, newStr)
 		}
 
-		fmt.Printf("%d. "+Red+Bold+"Повітряна тривога:"+Reset+" %s [%s] %s \n",
+		fmt.Printf("%d. "+bold+red+"Повітряна тривога:"+reset+" %s [%s] %s\n",
 			num+1,
 			alert.RegionName,
 			modifiedName,
 			strings.ReplaceAll(strings.ReplaceAll(alert.LastUpdate, "T", " "), "Z", ""))
 	}
 
-	fmt.Printf(Bold+"\nСтаном на: %s\n"+Reset, time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf(bold+"\nСтаном на: %s\n"+reset, time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func countAlerts(alerts []Alert) {
 	count := len(alerts)
-	fmt.Printf("%d\n", count)
+	fmt.Println(count)
+}
+
+func shouldShowCount() bool {
+	for _, arg := range os.Args {
+		if arg == "-n" {
+			return true
+		}
+	}
+	return false
 }
 
 func currentRegion() {
@@ -96,17 +101,53 @@ func currentRegion() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(strings.TrimSpace(string(configDir)))
-}
 
-func shouldShowCount() bool {
-	for _, arg := range os.Args {
-		if arg == "-n" {
-			return true
-		} else if arg == "-c" {
-			return true
+	targetRegion := strings.TrimSpace(string(configDir))
+
+	res, err := http.Get(api)
+	if err != nil {
+		fmt.Printf("Error getting API: %s\n", err)
+		return
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Printf("Error reading JSON file: %s\n", err)
+		return
+	}
+
+	var alerts []Alert
+	err = json.Unmarshal(body, &alerts)
+	if err != nil {
+		fmt.Printf("Error unmarshaling JSON file: %s\n", err)
+		return
+	}
+
+	replacements := map[string]string{
+		"State":     "Область",
+		"Community": "Громада",
+	}
+
+	var filteredAlerts []Alert
+	for _, alert := range alerts {
+		if alert.RegionName == targetRegion {
+			filteredAlerts = append(filteredAlerts, alert)
 		}
 	}
 
-	return false
+	for num, alert := range filteredAlerts {
+		modifiedName := alert.RegionType
+		for oldStr, newStr := range replacements {
+			modifiedName = strings.ReplaceAll(modifiedName, oldStr, newStr)
+		}
+
+		fmt.Printf("%d. "+bold+red+"Повітряна тривога:"+reset+" %s [%s] %s\n",
+			num+1,
+			alert.RegionName,
+			modifiedName,
+			strings.ReplaceAll(strings.ReplaceAll(alert.LastUpdate, "T", " "), "Z", ""))
+	}
+
+	fmt.Printf(bold+"\nСтаном на: %s\n"+reset, time.Now().Format("2006-01-02 15:04:05"))
 }
