@@ -136,18 +136,14 @@ func currentRegion() {
 		}
 	}
 
-	for num, alert := range filteredAlerts {
+	for _, alert := range filteredAlerts {
 		modifiedName := alert.RegionType
 		for oldStr, newStr := range replacements {
 			modifiedName = strings.ReplaceAll(modifiedName, oldStr, newStr)
 		}
 
-		fmt.Printf("%d. "+bold+red+"Повітряна тривога:"+reset+" %s [%s] %s\n",
-			num+1,
+		fmt.Printf(bold+red+"Повітряна тривога:"+reset+" %s %s\n",
 			alert.RegionName,
-			modifiedName,
 			strings.ReplaceAll(strings.ReplaceAll(alert.LastUpdate, "T", " "), "Z", ""))
 	}
-
-	fmt.Printf(bold+"\nСтаном на: %s\n"+reset, time.Now().Format("2006-01-02 15:04:05"))
 }
