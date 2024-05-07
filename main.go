@@ -1,10 +1,11 @@
 package main
 
 import (
-	"alert/rendick/cmd"
 	"fmt"
 	"runtime"
 	"strings"
+
+	"github.com/rendick/alert/cmd"
 )
 
 var (

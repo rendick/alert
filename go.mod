@@ -1,3 +1,3 @@
-module alert/rendick
+module github.com/rendick/alert
 
-go 1.21.6
+go 1.22.2
