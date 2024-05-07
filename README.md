@@ -7,11 +7,12 @@
 
 # Installation
 
-```sh
-git clone https://github.com/rendick/alert.git
-cd alert
-sudo make install
-```
+Download the latest release.
+- `curl -LO https://github.com/rendick/alert/releases/download/v0.2/alert && chmod +x alert` or you can install it manually `https://github.com/rendick/alert/releases/latest`
+
+Run `alert`. If you wanna install it locally, run the following command.
+
+- `sudo cp alert /usr/local/bin`
 
 # Usage
 
